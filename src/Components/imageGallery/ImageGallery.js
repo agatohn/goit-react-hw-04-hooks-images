@@ -75,12 +75,12 @@ export default class ImageGallery extends Component {
     const { query, handlePageIncr, onOpen } = this.props;
 
     if (status === "idle") {
-      return <div>Введите поисковый запрос.</div>;
+      return <div className="Div">Введите поисковый запрос.</div>;
     }
 
     if (status === "pending") {
       return (
-        <div>
+        <div className="Div">
           Ожидаем ответ по запросу: {query}
           <Loader
             type="ThreeDots"
@@ -134,7 +134,7 @@ export default class ImageGallery extends Component {
               />
             ))}
           </ul>
-          <button className="Button" type="button">
+          <button className="Loader" type="button">
             <Loader
               type="ThreeDots"
               color="#00BFFF"
