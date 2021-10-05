@@ -7,16 +7,16 @@ import Modal from "./Components/modal/Modal";
 export default class App extends Component {
   state = {
     query: "",
-    page: "1",
+    page: 1,
     showModal: false,
     urlModal: "",
   };
 
   handleFormSubmit = (query) => {
-    this.setState({ query, page: "1" });
+    this.setState({ query, page: 1 });
   };
   handlePageIncr = () => {
-    this.setState({ page: (Number(this.state.page) + 1).toString() });
+    this.setState({ page: Number(this.state.page) + 1 });
   };
 
   closeModal = () => {

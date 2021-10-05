@@ -219,6 +219,7 @@ img {
   display: inline-block;
   border: 0;
   min-width: 180px;
+  background-color: unset;
 }
 
 .Div {
