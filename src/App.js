@@ -10,8 +10,8 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [urlModal, setUrlModal] = useState("");
 
-  const handleFormSubmit = (query) => {
-    setQuery(query);
+  const handleFormSubmit = (q) => {
+    setQuery(q);
     setPage(Number(1));
   };
 
@@ -20,8 +20,8 @@ export default function App() {
   };
 
   const closeModal = () => {
-    setUrlModal("");
     setShowModal(false);
+    setUrlModal("");
   };
 
   const handleImageClick = (url) => {

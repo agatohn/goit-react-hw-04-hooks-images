@@ -70,76 +70,43 @@ export default class ImageGallery extends Component {
 
   render() {
     const { imgs, error, status } = this.state;
-    const { query, handlePageIncr, onOpen } = this.props;
-
-    if (status === "idle") {
-      return <div className="Div">Введите поисковый запрос.</div>;
-    }
-
-    if (status === "pending") {
-      return (
-        <div className="Div">
-          Ожидаем ответ по запросу: {query}
+    const { handlePageIncr, onOpen } = this.props;
+    return (
+      <>
+        {status === "idle" && (
+          <div className="Div">Введите поисковый запрос.</div>
+        )}
+        {status === "rejected" && <div>Возникла ошибка: {error.message}</div>}
+        {(status === "resolved" || status === "pendingMore") && (
+          <ul className="ImageGallery">
+            {imgs.map((img) => (
+              <ImageGalleryItem
+                urlLarge={img.largeImageURL}
+                url={img.webformatURL}
+                alt={img.tags}
+                key={img.id + img.webformatURL}
+                onClick={onOpen}
+              />
+            ))}
+          </ul>
+        )}
+        {status === "resolved" && (
+          <button onClick={handlePageIncr} className="Button" type="button">
+            Load More!
+          </button>
+        )}
+        {(status === "pending" || status === "pendingMore") && (
           <Loader
+            className="Loader"
             type="ThreeDots"
             color="#00BFFF"
             height={20}
             width={100}
             timeout={1000}
           />
-        </div>
-      );
-    }
-
-    if (status === "rejected") {
-      return <div>Возникла ошибка: {error.message}</div>;
-    }
-
-    if (status === "resolved") {
-      return (
-        <>
-          <ul className="ImageGallery">
-            {imgs.map((img) => (
-              <ImageGalleryItem
-                urlLarge={img.largeImageURL}
-                url={img.webformatURL}
-                alt={img.tags + img.tags}
-                key={img.id}
-                onClick={onOpen}
-              />
-            ))}
-          </ul>
-          <button onClick={handlePageIncr} className="Button" type="button">
-            Load More!
-          </button>
-        </>
-      );
-    }
-    if (status === "pendingMore") {
-      return (
-        <>
-          <ul className="ImageGallery">
-            {imgs.map((img) => (
-              <ImageGalleryItem
-                url={img.webformatURL}
-                alt={img.tags}
-                key={img.id + img.tags}
-                onClick={onOpen}
-              />
-            ))}
-          </ul>
-          <button className="Loader" type="button">
-            <Loader
-              type="ThreeDots"
-              color="#00BFFF"
-              height={20}
-              width={100}
-              timeout={1000}
-            />
-          </button>
-        </>
-      );
-    }
+        )}
+      </>
+    );
   }
 }
 
