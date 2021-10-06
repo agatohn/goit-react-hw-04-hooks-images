@@ -39,7 +39,7 @@ export default function ImageGallery({ query, page, onOpen, handlePageIncr }) {
     }
     if (page !== 1 && query !== "") {
       setStatus("pending");
-      imgAPI // eslint-disable-line
+      imgAPI
         .fetchImg(query, page)
         .then(({ hits }) => {
           return fetchSetter([...imgs, ...hits], "resolved");
@@ -52,6 +52,7 @@ export default function ImageGallery({ query, page, onOpen, handlePageIncr }) {
           })
         );
     }
+    // eslint-disable-next-line
   }, [page, query]);
 
   return (
