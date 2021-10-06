@@ -1,64 +1,50 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import ImageGalleryItem from "./imageGalleryItem/ImageGalleryItem";
 import imgAPI from "../../Services/pixabay-api";
 import { toast } from "react-toastify";
 import Loader from "react-loader-spinner";
 import PropTypes from "prop-types";
 
-const Status = {
-  IDLE: "idle",
-  PENDING: "pending",
-  PENDINGMORE: "pendingMore",
-  RESOLVED: "resolved",
-  REJECTED: "rejected",
-};
+export default function ImageGallery({ query, page, onOpen, handlePageIncr }) {
+  const [imgs, setImgs] = useState(null);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState("idle");
 
-export default class ImageGallery extends Component {
-  state = {
-    imgs: null,
-    error: null,
-    status: Status.IDLE,
-  };
+  function fetchSetter(imgArr, status) {
+    setImgs(imgArr);
+    setStatus(status);
+  }
+  function errorSetter(error, status) {
+    setError(error);
+    setStatus(status);
+  }
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevQuery = prevProps.query;
-    const nextQuery = this.props.query;
-    const prevPage = prevProps.page;
-    const nextPage = this.props.page;
-
-    if (prevQuery !== nextQuery) {
-      this.setState({ status: Status.PENDING });
+  useEffect(() => {
+    if (!query) {
+      return;
+    }
+    if (query !== "" && page === 1) {
+      setStatus("pending");
 
       imgAPI
-        .fetchImg(nextQuery)
+        .fetchImg(query)
         .then(({ hits }) => {
           if (hits[0]) {
-            return this.setState({
-              imgs: [...hits],
-              status: Status.RESOLVED,
-            });
+            return fetchSetter([...hits], "resolved");
           }
           toast.error("Такой картинки не существует.");
-          this.setState({ status: Status.IDLE });
+          setStatus("idle");
         })
-        .catch((error) => this.setState({ error, status: Status.REJECTED }));
+        .catch((error) => errorSetter(error, "rejected"));
     }
-    if (prevPage !== nextPage && prevQuery === nextQuery) {
-      this.setState({ status: Status.PENDINGMORE });
-      let prevPage = [];
-      if (prevState.imgs) {
-        prevPage = [...prevState.imgs];
-      }
-
-      imgAPI
-        .fetchImg(prevQuery, nextPage)
+    if (page !== 1 && query !== "") {
+      setStatus("pending");
+      imgAPI // eslint-disable-line
+        .fetchImg(query, page)
         .then(({ hits }) => {
-          return this.setState({
-            imgs: [...prevPage, ...hits],
-            status: Status.RESOLVED,
-          });
+          return fetchSetter([...imgs, ...hits], "resolved");
         })
-        .catch((error) => this.setState({ error, status: Status.REJECTED }))
+        .catch((error) => errorSetter(error, "rejected"))
         .finally(() =>
           window.scrollTo({
             top: document.documentElement.scrollHeight,
@@ -66,49 +52,46 @@ export default class ImageGallery extends Component {
           })
         );
     }
-  }
+  }, [page, query]);
 
-  render() {
-    const { imgs, error, status } = this.state;
-    const { handlePageIncr, onOpen } = this.props;
-    return (
-      <>
-        {status === "idle" && (
-          <div className="Div">Введите поисковый запрос.</div>
-        )}
-        {status === "rejected" && <div>Возникла ошибка: {error.message}</div>}
-        {(status === "resolved" || status === "pendingMore") && (
-          <ul className="ImageGallery">
-            {imgs.map((img) => (
-              <ImageGalleryItem
-                urlLarge={img.largeImageURL}
-                url={img.webformatURL}
-                alt={img.tags}
-                key={img.id + img.webformatURL}
-                onClick={onOpen}
-              />
-            ))}
-          </ul>
-        )}
-        {status === "resolved" && (
-          <button onClick={handlePageIncr} className="Button" type="button">
-            Load More!
-          </button>
-        )}
-        {(status === "pending" || status === "pendingMore") && (
-          <Loader
-            className="Loader"
-            type="ThreeDots"
-            color="#00BFFF"
-            height={20}
-            width={100}
-            timeout={1000}
-          />
-        )}
-      </>
-    );
-  }
+  return (
+    <>
+      {status === "idle" && (
+        <div className="Div">Введите поисковый запрос.</div>
+      )}
+      {status === "rejected" && <div>Возникла ошибка: {error.message}</div>}
+      {(status === "resolved" || (status === "pending" && imgs)) && (
+        <ul className="ImageGallery">
+          {imgs.map((img) => (
+            <ImageGalleryItem
+              urlLarge={img.largeImageURL}
+              url={img.webformatURL}
+              alt={img.tags}
+              key={img.id + img.webformatURL}
+              onClick={onOpen}
+            />
+          ))}
+        </ul>
+      )}
+      {status === "resolved" && (
+        <button onClick={handlePageIncr} className="Button" type="button">
+          Load More!
+        </button>
+      )}
+      {status === "pending" && (
+        <Loader
+          className="Loader"
+          type="ThreeDots"
+          color="#00BFFF"
+          height={20}
+          width={100}
+          timeout={1000}
+        />
+      )}
+    </>
+  );
 }
+// }
 
 ImageGallery.propTypes = {
   query: PropTypes.string.isRequired,
